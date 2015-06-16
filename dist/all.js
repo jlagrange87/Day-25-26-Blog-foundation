@@ -32574,9 +32574,9 @@ module.exports = React.createClass({
 	},
 	submitPost: function submitPost(e) {
 		e.preventDefault();
-		var blogPost = new BlogModel({
+		var blogPost = new BlogPostModel({
 			title: this.refs.titleB.getDOMNode().value,
-			text: this.refs.bodyB.getDOMNode().value,
+			body: this.refs.bodyB.getDOMNode().value,
 			category: this.refs.categoryB.getDOMNode().value,
 			username: null,
 			createdAt: new Date()
@@ -32584,7 +32584,7 @@ module.exports = React.createClass({
 		if (!blogPost.isValid()) {
 			console.log(blogPost.validationError);
 		} else {
-			console.log(blogPost);
+			this.props.newPost(blogPost);
 		}
 	}
 });
@@ -32617,6 +32617,7 @@ module.exports = React.createClass({
 			createdAt: new Date()
 		});
 		this.refs.commentText.getDOMNode().value = "";
+		this.props.newComment(comment);
 		console.log(comment.get("text"));
 	}
 });
@@ -32625,12 +32626,18 @@ module.exports = React.createClass({
 "use strict";
 
 var React = require("react");
-var CommentForm = require("./CommentForm");
-var CommentModel = require("../models/CommentModel.js");
 
 module.exports = React.createClass({
 	displayName: "exports",
 
+	componentWillMount: function componentWillMount() {
+		this.props.comments.on("add", this.commentAdded);
+	},
+	getInitialState: function getInitialState() {
+		return {
+			number: this.props.number
+		};
+	},
 	render: function render() {
 		var commentElements = this.props.comments.map(function (commentModel) {
 			return React.createElement(
@@ -32644,10 +32651,13 @@ module.exports = React.createClass({
 			null,
 			commentElements
 		);
+	},
+	commentAdded: function commentAdded(commentModel) {
+		this.forceUpdate();
 	}
 });
 
-},{"../models/CommentModel.js":168,"./CommentForm":163,"react":159}],165:[function(require,module,exports){
+},{"react":159}],165:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
@@ -32656,11 +32666,19 @@ var _ = require("backbone/node_modules/underscore");
 module.exports = React.createClass({
 	displayName: "exports",
 
+	componentWillMount: function componentWillMount() {
+		this.props.posts.on("add", this.postAdded);
+	},
+	getInitialState: function getInitialState() {
+		return {
+			number: this.props.number
+		};
+	},
 	render: function render() {
 		var sortedModels = this.props.posts.sortBy(function (postModel) {
 			return -1 * postModel.get("createdAt").getTime();
 		});
-		var topNModels = _.first(sortedModels, this.props.number);
+		var topNModels = _.first(sortedModels, this.state.number);
 
 		var topNElements = topNModels.map(function (postModel) {
 			return React.createElement(
@@ -32679,16 +32697,25 @@ module.exports = React.createClass({
 				React.createElement("br", null)
 			);
 		});
-
-		console.log(topNElements);
-
-		var strongEls = React.createElement("strong", {}, "This is bold");
 		return React.createElement(
 			"div",
 			null,
-			"blog posts go here",
-			topNElements
+			topNElements,
+			React.createElement("input", { type: "text", ref: "number", onChange: this.numberChanged })
 		);
+	},
+	postAdded: function postAdded(postModel) {
+		this.forceUpdate();
+	},
+
+	numberChanged: function numberChanged(e) {
+		console.log("number was changed");
+		var newNumber = this.refs.number.getDOMNode().value;
+		newNumber = parseInt(newNumber);
+		this.setState({
+			number: newNumber
+		});
+		console.log(newNumber);
 	}
 });
 
@@ -32701,18 +32728,25 @@ var CommentForm = require("./components/CommentForm");
 var BlogPost = require("./components/BlogPost");
 var CommentCollection = require("./collections/CommentCollection");
 var BlogCollection = require("./collections/BlogCollection");
-var blogCategories = ["Serious", "Important", "Mildly Important", "Not Important"];
 var blogPTest = new BlogCollection([{ title: "Super fun time", body: "LOL", category: "important", createdAt: new Date("2015-06-16T10:04:00") }, { title: "Super fun time X 2", body: "LOL X 2", category: "important", createdAt: new Date("2015-06-15T10:04:00") }]);
 var comments = new CommentCollection([{ text: "hello", createdAt: new Date() }, { text: "something", createdAt: new Date() }]);
 var RecentPosts = require("./components/RecentPosts");
+
+var blogCategories = ["React", "JavaScript", "HTML", "CSS"];
+function newPost(postModel) {
+	blogPTest.add(postModel);
+}
+function newComment(commentModel) {
+	comments.add(commentModel);
+}
 
 React.render(React.createElement(
 	"div",
 	null,
 	React.createElement(RecentPosts, { posts: blogPTest, number: 5 }),
-	React.createElement(BlogPost, { blogPTest: blogPTest, blogCategories: blogCategories }),
+	React.createElement(BlogPost, { blogCategories: blogCategories, newPost: newPost }),
 	React.createElement(CommentList, { comments: comments }),
-	React.createElement(CommentForm, null)
+	React.createElement(CommentForm, { newComment: newComment })
 ), document.getElementById("container"));
 
 },{"./collections/BlogCollection":160,"./collections/CommentCollection":161,"./components/BlogPost":162,"./components/CommentForm":163,"./components/CommentList":164,"./components/RecentPosts":165,"react":159}],167:[function(require,module,exports){
@@ -32735,12 +32769,9 @@ module.exports = Backbone.Model.extend({
 			return "Enter a post title.";
 		} else if (!attr.body) {
 			return "Enter a post body.";
-		} else if (!attr.category) {
-			return "Enter a post category.";
-		} else if (!attr.username) {
-			return "That username / password combination doesn't exist.";
+		} else {
+			return false;
 		}
-		return false;
 	}
 });
 

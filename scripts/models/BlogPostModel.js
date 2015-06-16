@@ -17,12 +17,8 @@ module.exports = Backbone.Model.extend({
 		else if(!attr.body) {
 			return "Enter a post body."
 		}
-		else if(!attr.category) {
-			return "Enter a post category."
+		else{
+			return false;
 		}
-		else if(!attr.username) {
-			return "That username / password combination doesn't exist."
-		}
-		return false;
 	}
 });

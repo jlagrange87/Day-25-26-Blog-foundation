@@ -17,6 +17,7 @@ module.exports = React.createClass({
 			createdAt: new Date()
 		});
 		this.refs.commentText.getDOMNode().value =  "";
+		this.props.newComment(comment);
 		console.log(comment.get("text"));
 	}
 });

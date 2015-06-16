@@ -19,9 +19,9 @@ module.exports = React.createClass({
 	},
 	submitPost: function(e){
 		e.preventDefault();
-		var blogPost = new BlogModel({
+		var blogPost = new BlogPostModel({
 			title: this.refs.titleB.getDOMNode().value,
-			text: this.refs.bodyB.getDOMNode().value,
+			body: this.refs.bodyB.getDOMNode().value,
 			category: this.refs.categoryB.getDOMNode().value,
 			username: null,
 			createdAt: new Date()
@@ -30,7 +30,7 @@ module.exports = React.createClass({
 			console.log(blogPost.validationError);
 		}
 		else {
-			console.log(blogPost);
+			this.props.newPost(blogPost);
 		}
 	}
 });

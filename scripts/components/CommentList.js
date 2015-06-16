@@ -1,16 +1,29 @@
 var React = require("react");
-var CommentForm = require("./CommentForm");
-var CommentModel = require("../models/CommentModel.js");
 
 module.exports = React.createClass({
+	componentWillMount: function(){
+		this.props.comments.on("add", this.commentAdded)
+	},
+	getInitialState: function(){
+		return {
+			number: this.props.number
+		};
+	},
 	render: function(){
 		var commentElements = this.props.comments.map(function(commentModel){
-			return (<div key={commentModel.cid}>{commentModel.get("text")}</div>)
-		})
+			return (
+				<div key={commentModel.cid}>
+					{commentModel.get("text")}
+				</div>
+			);
+		});
 		return (
 			<div>
 			{commentElements}
 			</div>
 		);
+	},
+	commentAdded: function(commentModel){
+		this.forceUpdate();
 	}
 });
