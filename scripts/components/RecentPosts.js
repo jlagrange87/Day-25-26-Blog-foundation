@@ -1,27 +1,31 @@
 var React = require("react");
-var CommentCollection = require("../scripts/collections/CommentCollection.js");
-var recentComments = new CommentCollection();
+var _ = require("backbone/node_modules/underscore")
 
 module.exports = React.createClass({
-	getComments: function(){
-		return (
-			recentComments.length
-			);
-	},
 	render: function(){
-		if(recentComments.length > 0){
+		var sortedModels = this.props.posts.sortBy(function(postModel){
+			return -1*postModel.get("createdAt").getTime();
+
+		});
+		var topNModels = _.first(sortedModels, this.props.number);
+
+		var topNElements = topNModels.map(function(postModel){
 			return (
-				<div>
-					{this.state};
+				<div key={postModel.cid}>
+					<h2>{postModel.get("title")}</h2>
+					<p>{postModel.get("body")}</p><br/>
 				</div>
 			);
-		}
-		else {
-			return (
-				<div>
-					"There are no blog posts yet.";
-				</div>
-			);
-		}
+		});
+
+		console.log(topNElements);
+
+		var strongEls = React.createElement("strong", {}, "This is bold")
+		return (
+			<div>
+				blog posts go here
+				{topNElements}
+			</div>
+			)
 	}
 });

@@ -7,7 +7,6 @@ module.exports = React.createClass({
 		var commentElements = this.props.comments.map(function(commentModel){
 			return (<div key={commentModel.cid}>{commentModel.get("text")}</div>)
 		})
-		console.log(commentElements);
 		return (
 			<div>
 			{commentElements}

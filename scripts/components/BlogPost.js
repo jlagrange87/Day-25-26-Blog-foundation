@@ -1,5 +1,5 @@
 var React = require("react");
-var BlogPostModel = require("../models/CommentModel.js");
+var BlogPostModel = require("../models/BlogPostModel.js");
 
 module.exports = React.createClass({
 	render: function(){

@@ -32512,14 +32512,14 @@ module.exports = require('./lib/React');
 
 var Backbone = require("backbone");
 Backbone.$ = require("jquery");
-var BlogPostModel = require("../models/CommentModel.js");
+var BlogPostModel = require("../models/BlogPostModel");
 
 module.exports = Backbone.Collection.extend({
 	model: BlogPostModel
 
 });
 
-},{"../models/CommentModel.js":166,"backbone":1,"jquery":4}],161:[function(require,module,exports){
+},{"../models/BlogPostModel":167,"backbone":1,"jquery":4}],161:[function(require,module,exports){
 "use strict";
 
 var Backbone = require("backbone");
@@ -32531,11 +32531,11 @@ module.exports = Backbone.Collection.extend({
 
 });
 
-},{"../models/CommentModel":166,"backbone":1,"jquery":4}],162:[function(require,module,exports){
+},{"../models/CommentModel":168,"backbone":1,"jquery":4}],162:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
-var BlogPostModel = require("../models/CommentModel.js");
+var BlogPostModel = require("../models/BlogPostModel.js");
 
 module.exports = React.createClass({
 	displayName: "exports",
@@ -32589,7 +32589,7 @@ module.exports = React.createClass({
 	}
 });
 
-},{"../models/CommentModel.js":166,"react":159}],163:[function(require,module,exports){
+},{"../models/BlogPostModel.js":167,"react":159}],163:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
@@ -32621,7 +32621,7 @@ module.exports = React.createClass({
 	}
 });
 
-},{"../models/CommentModel.js":166,"react":159}],164:[function(require,module,exports){
+},{"../models/CommentModel.js":168,"react":159}],164:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
@@ -32639,7 +32639,6 @@ module.exports = React.createClass({
 				commentModel.get("text")
 			);
 		});
-		console.log(commentElements);
 		return React.createElement(
 			"div",
 			null,
@@ -32648,7 +32647,52 @@ module.exports = React.createClass({
 	}
 });
 
-},{"../models/CommentModel.js":166,"./CommentForm":163,"react":159}],165:[function(require,module,exports){
+},{"../models/CommentModel.js":168,"./CommentForm":163,"react":159}],165:[function(require,module,exports){
+"use strict";
+
+var React = require("react");
+var _ = require("backbone/node_modules/underscore");
+
+module.exports = React.createClass({
+	displayName: "exports",
+
+	render: function render() {
+		var sortedModels = this.props.posts.sortBy(function (postModel) {
+			return -1 * postModel.get("createdAt").getTime();
+		});
+		var topNModels = _.first(sortedModels, this.props.number);
+
+		var topNElements = topNModels.map(function (postModel) {
+			return React.createElement(
+				"div",
+				{ key: postModel.cid },
+				React.createElement(
+					"h2",
+					null,
+					postModel.get("title")
+				),
+				React.createElement(
+					"p",
+					null,
+					postModel.get("body")
+				),
+				React.createElement("br", null)
+			);
+		});
+
+		console.log(topNElements);
+
+		var strongEls = React.createElement("strong", {}, "This is bold");
+		return React.createElement(
+			"div",
+			null,
+			"blog posts go here",
+			topNElements
+		);
+	}
+});
+
+},{"backbone/node_modules/underscore":2,"react":159}],166:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
@@ -32658,17 +32702,49 @@ var BlogPost = require("./components/BlogPost");
 var CommentCollection = require("./collections/CommentCollection");
 var BlogCollection = require("./collections/BlogCollection");
 var blogCategories = ["Serious", "Important", "Mildly Important", "Not Important"];
-var blogPTest = new BlogCollection([{ title: "Super fun time", body: "LOL", category: "important" }, { title: "Super fun time X 2", body: "LOL X 2", category: "important" }]);
+var blogPTest = new BlogCollection([{ title: "Super fun time", body: "LOL", category: "important", createdAt: new Date("2015-06-16T10:04:00") }, { title: "Super fun time X 2", body: "LOL X 2", category: "important", createdAt: new Date("2015-06-15T10:04:00") }]);
 var comments = new CommentCollection([{ text: "hello", createdAt: new Date() }, { text: "something", createdAt: new Date() }]);
+var RecentPosts = require("./components/RecentPosts");
+
 React.render(React.createElement(
 	"div",
 	null,
+	React.createElement(RecentPosts, { posts: blogPTest, number: 5 }),
 	React.createElement(BlogPost, { blogPTest: blogPTest, blogCategories: blogCategories }),
 	React.createElement(CommentList, { comments: comments }),
 	React.createElement(CommentForm, null)
 ), document.getElementById("container"));
 
-},{"./collections/BlogCollection":160,"./collections/CommentCollection":161,"./components/BlogPost":162,"./components/CommentForm":163,"./components/CommentList":164,"react":159}],166:[function(require,module,exports){
+},{"./collections/BlogCollection":160,"./collections/CommentCollection":161,"./components/BlogPost":162,"./components/CommentForm":163,"./components/CommentList":164,"./components/RecentPosts":165,"react":159}],167:[function(require,module,exports){
+"use strict";
+
+var Backbone = require("backbone");
+Backbone.$ = require("jquery");
+
+module.exports = Backbone.Model.extend({
+	defaults: {
+		title: "",
+		body: "",
+		category: "",
+		userId: null,
+		createdAt: null
+	},
+
+	validate: function validate(attr) {
+		if (!attr.title) {
+			return "Enter a post title.";
+		} else if (!attr.body) {
+			return "Enter a post body.";
+		} else if (!attr.category) {
+			return "Enter a post category.";
+		} else if (!attr.username) {
+			return "That username / password combination doesn't exist.";
+		}
+		return false;
+	}
+});
+
+},{"backbone":1,"jquery":4}],168:[function(require,module,exports){
 "use strict";
 
 var Backbone = require("backbone");
@@ -32682,7 +32758,7 @@ module.exports = Backbone.Model.extend({
 	}
 });
 
-},{"backbone":1,"jquery":4}]},{},[165])
+},{"backbone":1,"jquery":4}]},{},[166])
 
 
 //# sourceMappingURL=all.js.map
