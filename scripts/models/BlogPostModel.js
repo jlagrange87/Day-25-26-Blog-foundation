@@ -3,10 +3,10 @@ Backbone.$ = require("jquery");
 
 module.exports = Backbone.Model.extend({
 	defaults: {
-		title: null,
-		body: null,
-		category: null,
-		username:null,
+		title: "",
+		body: "",
+		category: "",
+		userId:null,
 		createdAt:null
 	},
 
